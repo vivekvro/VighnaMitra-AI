@@ -40,4 +40,4 @@ if st.button("Send"):
         chain = load_chain()
         res = chain.invoke({"input":user_input})
         st.success("Thinking Done\n")
-        st.write(res)
+        st.write(res['text'])
