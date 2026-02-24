@@ -1,4 +1,4 @@
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate,MessagesPlaceholder,ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser,PydanticOutputParser
 from pydantic import BaseModel,Field
 from typing import Literal,Annotated
@@ -52,6 +52,46 @@ Note:
 
 
 
+
+NormalChatPrompt = PromptTemplate(
+    template="""
+Your name is V-Mitra Ai, and You are doing NormalChats with user:
+reply user in helpful tone. 
+if topic is out of your memory or if you do not about that just reply "Sorry , i don't know"
+userchat : {userinput}
+
+""",
+input_variables=['userinput']
+)
+
+DocumentQuestionPrompt = PromptTemplate(
+    template="tell user to go to the Source-to-Answer Page"
+)
+
+
+
+
+
+#--------------------------- chat model prompt ---------------------------#
+
+
+ChatNormalPrompt = ChatPromptTemplate.from_messages([
+    ("system","You are a Helpful Assistant. and Your name is Vighna Mitra AI, also Known as V-Mitra Ai(but do not mention it in every chat). every time return responses in proper markdown format, so that output will look clean and structured"),
+    MessagesPlaceholder(variable_name="history"),
+    ("human","{input}")
+
+])
+
+
+
+
+
+
+
+
+
+
+#----------------------------- Source to Answer ------------------------------#
 
 QuestionsFromDocumentPrompt = PromptTemplate(
     template="""
