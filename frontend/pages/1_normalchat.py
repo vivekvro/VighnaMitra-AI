@@ -1,7 +1,11 @@
 import streamlit as st
-import requests
+from backend.api.Chains import get_chat_chain
 
-url = "https://vighnamitra-api.onrender.com/main/chat"
+@st.cache_resource
+def load_chain():
+    return get_chat_chain()
+
+
 
 st.title("🧠 VighnaMitra AI")
 
@@ -27,10 +31,7 @@ Start your conversation below 👇
 user_input = st.text_area("Enter Your message: ")
 if st.button("Send"):
     with st.spinner("Thinking.........."):
-        response = requests.post(
-            url=url,
-            json={"message":user_input}
-                )
-        result = response.json()
+        chain = load_chain()
+        res = chain.invoke({"input":user_input})
         st.success("Thinking Done\n")
-        st.write(result['response'])
+        st.write(res)
