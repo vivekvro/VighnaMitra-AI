@@ -3,9 +3,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from dotenv import load_dotenv
 from langchain_core.documents import Document
 from typing import List
-from transformers import logging
-from app.rag.LoadtoDocs import process_input
-logging.set_verbosity_error()
+from backend.rag.LoadtoDocs import process_input
 
 def FaissRetreiver(docs: List[Document],embedding="sentence-transformers/all-MiniLM-L6-v2"):
     load_dotenv()

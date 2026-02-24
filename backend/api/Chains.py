@@ -1,9 +1,9 @@
 from langchain_core.runnables import RunnableLambda,RunnableParallel,RunnableBranch,RunnableWithMessageHistory,RunnablePassthrough
-from app.rag.PromptsAndParsers import UserInputClassificationPrompt,InputClassifierParser as UserInputClassifierParser
-from app.rag.PromptsAndParsers import QuestionsFromDocumentPrompt, StrParser
-from app.rag.Chatmodels import AutoChatModel
-from app.rag.LoadtoDocs import process_input
-from app.rag.Retrievers import FaissRetreiver,get_retriever_context,get_retriever
+from backend.rag.PromptsAndParsers import UserInputClassificationPrompt,InputClassifierParser as UserInputClassifierParser
+from backend.rag.PromptsAndParsers import QuestionsFromDocumentPrompt, StrParser
+from backend.rag.Chatmodels import AutoChatModel
+from backend.rag.LoadtoDocs import process_input
+from backend.rag.Retrievers import FaissRetreiver,get_retriever_context,get_retriever
 
 import tempfile
 

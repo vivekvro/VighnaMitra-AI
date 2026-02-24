@@ -2,7 +2,7 @@ from langchain_community.document_loaders import TextLoader,WebBaseLoader,PyMuPD
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from typing import Optional,List,Literal
-import tempfile
+
 
 #------------------------- Splitters ---------------------------------------------------#
 
@@ -22,25 +22,15 @@ def Splitter_text(docs,chunk_size=900,chunk_overlap=150,separators=["\n```","\nc
 # pdf loader
 
 
-def pdf_path(upload_file):
-    with tempfile.NamedTemporaryFile(delete=False,suffix=".pdf") as tmp:
-        tmp.write(upload_file.read())
-        tmp.flush()
-    return tmp.name
 def load_pdf(upload_file):
-    loader = PyMuPDFLoader(pdf_path(upload_file))
+    loader = PyMuPDFLoader(upload_file)
     return loader.load()
 
 # txt file loader
 
-def txt_path(upload_file):
-    with tempfile.NamedTemporaryFile(delete=False,suffix=".txt") as tmp:
-        tmp.write(upload_file.read())
-        tmp.flush()
-    return tmp.name
 
 def load_txt(upload_file):
-    loader = TextLoader(txt_path(upload_file))
+    loader = TextLoader(upload_file)
     return loader.load()
 
 def load_url(urls):
