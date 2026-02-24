@@ -1,4 +1,10 @@
 import streamlit as st
+import sys
+import os
+
+# Add project root to path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+
 from backend.api.Chains import get_chat_chain
 
 @st.cache_resource
