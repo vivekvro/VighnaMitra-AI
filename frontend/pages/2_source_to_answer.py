@@ -1,8 +1,8 @@
 import streamlit as st
 import requests
 import tempfile
-atud_url = "http://127.0.0.1:8000/main/atud"
-upload_url = "http://127.0.0.1:8000/main/upload"
+atud_url = "https://vighnamitra-api.onrender.com//main/atud"
+upload_url = "https://vighnamitra-api.onrender.com//main/upload"
 
 
 

@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-url = "http://127.0.0.1:8000/main/chat"
+url = "https://vighnamitra-api.onrender.com/main/chat"
 
 st.title("🧠 VighnaMitra AI")
 
