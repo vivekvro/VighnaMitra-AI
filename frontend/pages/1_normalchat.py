@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import uuid
 
-BACKEND_URL = st.secrets["BACKEND_URL"]
+BACKEND_URL = st.secrets.get("BACKEND_URL", "https://your-backend-url.com")
 
 if "session_id" not in st.session_state:
     st.session_state.session_id = str(uuid.uuid4())
@@ -28,5 +28,5 @@ if st.button("Send") and user_input.strip():
             st.success("Done")
             st.write(result["response"])
         else:
-            st.error("Error")
+            st.error(f"Error {response.status_code}")
             st.write(response.text)

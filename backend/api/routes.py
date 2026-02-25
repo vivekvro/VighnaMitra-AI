@@ -1,11 +1,23 @@
-from fastapi import FastAPI, UploadFile, File, Form, Body
+from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import JSONResponse
-from backend.api.Chains import get_llm, get_rag_chain,get_llm,get_chat_chain
+from fastapi.middleware.cors import CORSMiddleware
+from backend.api.Chains import get_llm, get_rag_chain, get_chat_chain
 from backend.rag.Retrievers import get_retriever
 from pydantic import BaseModel
 import tempfile
 import os
+
 app = FastAPI()
+
+# ✅ IMPORTANT FOR STREAMLIT CLOUD
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # ---- Models ----
 
 class QueryRequest(BaseModel):
@@ -17,12 +29,13 @@ class TextUpload(BaseModel):
 
 retriever_store = {}
 chain_store = {}
+chat_sessions = {}
 
-model = get_llm()  
+model = get_llm()
 
-
-
-
+# =====================================
+# FILE UPLOAD
+# =====================================
 
 @app.post("/main/upload_file")
 async def upload_file(
@@ -82,7 +95,9 @@ def ask_question(UserData: QueryRequest):
     return {"response": response}
 
 
-chat_sessions = {}
+# =====================================
+# NORMAL CHAT
+# =====================================
 
 class UserChat(BaseModel):
     message: str
@@ -91,8 +106,6 @@ class UserChat(BaseModel):
 
 @app.post("/main/chat")
 async def return_chatresponse(user: UserChat):
-
-    # Create session chain if not exists
     if user.session_id not in chat_sessions:
         chat_sessions[user.session_id] = get_chat_chain()
 
