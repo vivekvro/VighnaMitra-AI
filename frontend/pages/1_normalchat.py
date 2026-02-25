@@ -1,46 +1,32 @@
 import streamlit as st
-import sys
-import os
+import requests
+import uuid
 
-# Add project root to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+BACKEND_URL = st.secrets["BACKEND_URL"]
 
-from backend.api.Chains import get_chat_chain
-
-@st.cache_resource
-def load_chain():
-    return get_chat_chain()
-
-def get_user_chain():
-    if "chat_chain" not in st.session_state:
-        st.session_state.chat_chain = load_chain()
-    return st.session_state.chat_chain
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
 
 st.title("🧠 VighnaMitra AI")
 
-st.markdown("""
-## 💬 Chat with VighnaMitra
+user_input = st.text_area("Enter your message:")
 
-Welcome! You can have intelligent conversations with your AI companion here.
-
-### What you can do:
-- Ask questions about any topic  
-- Learn concepts step-by-step  
-- Brainstorm ideas  
-- Get explanations and guidance  
-
-### 📝 Note
-- If a response isn’t helpful, please provide feedback to help improve VighnaMitra.
-- Feel free to ask anything — curiosity is encouraged!
-
----
-Start your conversation below 👇
-""")
-
-user_input = st.text_area("Enter Your message: ")
 if st.button("Send") and user_input.strip():
-    with st.spinner("Thinking.........."):
-        chain = get_user_chain()
-        res = chain.invoke({"input":user_input})
-        st.success("Thinking Done\n")
-        st.write(res['text'])
+
+    with st.spinner("Thinking..."):
+
+        response = requests.post(
+            f"{BACKEND_URL}/main/chat",
+            json={
+                "message": user_input,
+                "session_id": st.session_state.session_id
+            }
+        )
+
+        if response.status_code == 200:
+            result = response.json()
+            st.success("Done")
+            st.write(result["response"])
+        else:
+            st.error("Error")
+            st.write(response.text)

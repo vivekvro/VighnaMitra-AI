@@ -1,59 +1,45 @@
 import streamlit as st
 import requests
-import tempfile
-
-# Correct URLs (no double slash)
 
 BACKEND_URL = st.secrets["BACKEND_URL"]
 
-# BASE_URL = "https://vighnamitra-api.onrender.com"
-# atud_url = f"{BASE_URL}/main/atud"
-# upload_url = f"{BASE_URL}/main/upload"
+UPLOAD_FILE_URL = f"{BACKEND_URL}/main/upload_file"
+UPLOAD_TEXT_URL = f"{BACKEND_URL}/main/upload_text"
+ATUD_URL = f"{BACKEND_URL}/main/atud"
 
 
-def Uploadbotton(source_type, upload_file):
+def upload_source(source_type, upload_file):
     try:
-        if source_type in ["url", "usertext"]:
-            if st.button(f"Upload {source_type}"):
-                with st.spinner("Uploading..."):
-                    response = requests.post(
-                        url=upload_url,
-                        json={
-                            "source_type": source_type,
-                            "upload_file": upload_file
-                        }
-                    )
+        with st.spinner("Uploading..."):
 
-                    if response.status_code == 200:
-                        result = response.json()
-                        st.success(result.get("status", "Uploaded"))
-                    else:
-                        st.error(f"Error: {response.status_code}")
-                        st.write(response.text)
-
-        elif source_type in ["pdf", "txt"]:
-            if st.button("Upload file"):
+            # ---- FILE UPLOAD ----
+            if source_type in ["pdf", "txt"]:
                 files = {
-                    "file": (upload_file.name, upload_file, "application/pdf")
+                    "file": (upload_file.name, upload_file, upload_file.type)
                 }
+                data = {"source_type": source_type}
 
-                data = {
-                    "source_type": source_type
-                }
-                with st.spinner("Uploading..."):
+                response = requests.post(
+                    UPLOAD_FILE_URL,
+                    files=files,
+                    data=data
+                )
 
-                    response = requests.post(
-                        f"{BACKEND_URL}/main/upload",
-                        files=files,
-                        data=data
-                    )
+            # ---- TEXT / URL UPLOAD ----
+            else:
+                response = requests.post(
+                    UPLOAD_TEXT_URL,
+                    json={
+                        "source_type": source_type,
+                        "upload_file": upload_file
+                    }
+                )
 
-                    if response.status_code == 200:
-                        result = response.json()
-                        st.success(result.get("status"))
-                    else:
-                        st.error(f"Error: {response.status_code}")
-                        st.write(response.text)
+            if response.status_code == 200:
+                st.success("Uploaded successfully.")
+            else:
+                st.error(f"Error: {response.status_code}")
+                st.write(response.text)
 
     except Exception as e:
         st.error(f"Upload failed: {e}")
@@ -62,59 +48,43 @@ def Uploadbotton(source_type, upload_file):
 # ================= UI =================
 
 st.title("V-Mitra AI")
-
-st.markdown("""
-### Document Intelligence • Source-to-Answer
----
-Upload a source and ask your question.
----
-""")
+st.markdown("### Document Intelligence • Source-to-Answer")
 
 source_type = st.selectbox(
-    "Select Your Doc input type:",
-    ['pdf', 'usertext', 'txt', 'url']
+    "Select Input Type:",
+    ['pdf', 'txt', 'usertext', 'url']
 )
 
-# File inputs
-if source_type in ["pdf", "txt"]:
-    upload_file = st.file_uploader(
-        f"Upload Your {source_type}",
-        type=[source_type]
-    )
-    if upload_file is not None:
-        Uploadbotton(source_type, upload_file)
+upload_file = None
+userquery = None
 
-    userquery = st.text_area("Enter Your Query:")
+if source_type in ["pdf", "txt"]:
+    upload_file = st.file_uploader("Upload File", type=[source_type])
 
 elif source_type == "usertext":
-    upload_file = st.text_area("Enter your topics")
-    if upload_file:
-        Uploadbotton(source_type, upload_file)
-
-    userquery = st.text_area("Enter Your Query:")
+    upload_file = st.text_area("Enter Text")
 
 elif source_type == "url":
-    upload_file = st.text_input(
-        "Enter your URL (example: https://example.com)"
-    )
-    if upload_file:
-        Uploadbotton(source_type, upload_file)
+    upload_file = st.text_input("Enter URL")
 
-    userquery = st.text_area("Enter Your Query:")
+if upload_file:
+    if st.button("Upload"):
+        upload_source(source_type, upload_file)
 
-# Ask section
+userquery = st.text_area("Enter Your Query")
+
 if st.button("Ask"):
     try:
         with st.spinner("Thinking..."):
             response = requests.post(
-                url=atud_url,
+                ATUD_URL,
                 json={"userquery": userquery}
             )
 
             if response.status_code == 200:
                 result = response.json()
                 st.success("Done.")
-                st.write(result.get("response", "No response received."))
+                st.write(result.get("response", "No response"))
             else:
                 st.error(f"Error: {response.status_code}")
                 st.write(response.text)
