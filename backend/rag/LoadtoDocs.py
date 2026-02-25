@@ -6,14 +6,14 @@ from typing import Optional,List,Literal
 
 #------------------------- Splitters ---------------------------------------------------#
 
-def Splitter_docs(text,chunk_size=500,chunk_overlap=80,separators=["\n```","\nclass","\ndef",'\n\n',".\n",". ","\n"," ",""]):
+def Splitter_docs(doc,chunk_size=500,chunk_overlap=80,separators=["\n```","\nclass","\ndef",'\n\n',".\n",". ","\n"," ",""]):
     splitter = RecursiveCharacterTextSplitter(separators=separators,chunk_size=chunk_size,chunk_overlap=chunk_overlap)
-    return splitter.split_documents(text)
+    return splitter.split_documents(doc)
 
 
-def Splitter_text(docs,chunk_size=500,chunk_overlap=80,separators=["\n```","\nclass","\ndef",'\n\n',".\n","\n"]):
+def Splitter_text(text,chunk_size=500,chunk_overlap=80,separators=["\n```","\nclass","\ndef",'\n\n',".\n","\n"]):
     splitter = RecursiveCharacterTextSplitter(separators=separators,chunk_size=chunk_size,chunk_overlap=chunk_overlap)
-    return splitter.split_text(docs)
+    return splitter.split_text(text)
 
 
 #------------------------- FileLoaders ---------------------------------------------------#

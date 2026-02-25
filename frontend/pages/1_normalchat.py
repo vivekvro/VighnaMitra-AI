@@ -10,12 +10,11 @@ from backend.api.Chains import get_chat_chain
 @st.cache_resource
 def load_chain():
     return get_chat_chain()
+
 def get_user_chain():
     if "chat_chain" not in st.session_state:
-        llm = get_chat_chain()
-        st.session_state.chat_chain = get_chat_chain(llm)
+        st.session_state.chat_chain = load_chain()
     return st.session_state.chat_chain
-
 
 st.title("🧠 VighnaMitra AI")
 
@@ -30,7 +29,7 @@ Welcome! You can have intelligent conversations with your AI companion here.
 - Brainstorm ideas  
 - Get explanations and guidance  
 
-### 📝 Note:
+### 📝 Note
 - If a response isn’t helpful, please provide feedback to help improve VighnaMitra.
 - Feel free to ask anything — curiosity is encouraged!
 
@@ -39,7 +38,7 @@ Start your conversation below 👇
 """)
 
 user_input = st.text_area("Enter Your message: ")
-if st.button("Send"):
+if st.button("Send") and user_input.strip():
     with st.spinner("Thinking.........."):
         chain = get_user_chain()
         res = chain.invoke({"input":user_input})

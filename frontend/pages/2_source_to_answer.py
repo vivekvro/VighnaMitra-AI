@@ -3,9 +3,12 @@ import requests
 import tempfile
 
 # Correct URLs (no double slash)
-BASE_URL = "https://vighnamitra-api.onrender.com"
-atud_url = f"{BASE_URL}/main/atud"
-upload_url = f"{BASE_URL}/main/upload"
+
+BACKEND_URL = st.secrets["BACKEND_URL"]
+
+# BASE_URL = "https://vighnamitra-api.onrender.com"
+# atud_url = f"{BASE_URL}/main/atud"
+# upload_url = f"{BASE_URL}/main/upload"
 
 
 def Uploadbotton(source_type, upload_file):
@@ -30,23 +33,24 @@ def Uploadbotton(source_type, upload_file):
 
         elif source_type in ["pdf", "txt"]:
             if st.button("Upload file"):
-                with tempfile.NamedTemporaryFile(delete=False, suffix=f".{source_type}") as tmp:
-                    tmp.write(upload_file.read())
-                    tmp.flush()
-                    temp_path = tmp.name
+                files = {
+                    "file": (upload_file.name, upload_file, "application/pdf")
+                }
 
+                data = {
+                    "source_type": source_type
+                }
                 with st.spinner("Uploading..."):
+
                     response = requests.post(
-                        url=upload_url,
-                        json={
-                            "source_type": source_type,
-                            "upload_file": temp_path
-                        }
+                        f"{BACKEND_URL}/main/upload",
+                        files=files,
+                        data=data
                     )
 
                     if response.status_code == 200:
                         result = response.json()
-                        st.success(result.get("status", "Uploaded"))
+                        st.success(result.get("status"))
                     else:
                         st.error(f"Error: {response.status_code}")
                         st.write(response.text)

@@ -16,7 +16,7 @@ def FaissRetreiver(docs: List[Document],embedding="sentence-transformers/all-Min
 
 def get_retriever(usersource,source_type):
     docs = process_input(file_path=usersource,source_type=source_type)
-    Retriever = FaissRetreiver(docs)
+    Retriever = FaissRetreiver(docs=docs)
     return Retriever
 
 

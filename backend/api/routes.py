@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,UploadFile,File,Form
 from fastapi.responses import JSONResponse
 from backend.api.Chains import get_llm, get_rag_chain,get_llm,get_chat_chain
 from backend.rag.Retrievers import get_retriever
@@ -6,9 +6,7 @@ from pydantic import BaseModel
 
 class QueryRequest(BaseModel):
     userquery:str
-class File_upload(BaseModel):
-    source_type:str
-    upload_file: str
+
 
 class UserChat(BaseModel):
     message:str
@@ -21,10 +19,15 @@ model = get_llm()   # load once
 
 
 @app.post("/main/upload")
-def upload_file(data: File_upload):
-
-    retriever = get_retriever(data.upload_file, data.source_type)
-
+async def upload_file(
+    source_type: str = Form(...),
+    file:UploadFile = File(...)
+    ):
+    contents = await file.read()
+    temp_path = "temp.pdf"
+    with open(temp_path,"wb") as f:
+        f.write(contents)
+    retriever = get_retriever(temp_path, source_type)
     retriever_store["current"] = retriever
 
     return {"status": "*Uploaded*"}
@@ -41,10 +44,9 @@ def return_pdfQnAresponse(UserData: QueryRequest):
     chain_response = chain.invoke(UserData.userquery)
 
     return {"response": chain_response}
-
+chain = get_chat_chain()
 
 @app.post("/main/chat")
 async def return_chatresponse(user: UserChat):
-        chain = get_chat_chain()
-        response = chain.invoke({"input":user.message})
-        return JSONResponse(content={"response":response['text']})
+    response = chain.invoke({"input":user.message})
+    return JSONResponse(content={"response":response['text']})
