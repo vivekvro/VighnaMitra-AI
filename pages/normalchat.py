@@ -1,8 +1,11 @@
 import streamlit as st
 import requests
+import os
+from dotenv import load_dotenv
 import uuid
+load_dotenv()
 
-BACKEND_URL = st.secrets.get("BACKEND_URL", "https://your-backend-url.com")
+BACKEND_URL = os.getenv("BACKEND_URL")
 
 if "session_id" not in st.session_state:
     st.session_state.session_id = str(uuid.uuid4())

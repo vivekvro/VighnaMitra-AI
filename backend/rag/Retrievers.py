@@ -1,15 +1,20 @@
 from langchain_community.vectorstores import FAISS
-from langchain_huggingface import HuggingFaceEndpointEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
+
 from dotenv import load_dotenv
 from langchain_core.documents import Document
 from typing import List
 from backend.rag.LoadtoDocs import process_input
 
+
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
 def FaissRetreiver(docs: List[Document],embedding="sentence-transformers/all-MiniLM-L6-v2"):
     load_dotenv()
     Vec_Store = FAISS.from_documents(
         documents=docs,
-        embedding=HuggingFaceEndpointEmbeddings(repo_id="google/embeddinggemma-300m")
+        embedding=embeddings
     )
     return Vec_Store.as_retriever(search_kwargs={'k':10})
 

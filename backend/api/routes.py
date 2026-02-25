@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form,APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from backend.api.Chains import get_llm, get_rag_chain, get_chat_chain
@@ -6,17 +6,13 @@ from backend.rag.Retrievers import get_retriever
 from pydantic import BaseModel
 import tempfile
 import os
-
 app = FastAPI()
+from typing import Dict
 
-# ✅ IMPORTANT FOR STREAMLIT CLOUD
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+router = APIRouter()
+
+
+
 
 # ---- Models ----
 
@@ -29,6 +25,8 @@ class TextUpload(BaseModel):
 
 retriever_store = {}
 chain_store = {}
+
+
 chat_sessions = {}
 
 model = get_llm()
@@ -82,35 +80,52 @@ def upload_text(data: TextUpload):
 # ASK QUESTION
 # =====================================
 
-@app.post("/main/atud")
+
+@router.post("/main/atud")
 def ask_question(UserData: QueryRequest):
 
     chain = chain_store.get("current")
 
     if chain is None:
-        return {"error": "No source uploaded yet."}
+        raise HTTPException(
+            status_code=400,
+            detail="No source uploaded yet."
+        )
 
     response = chain.invoke(UserData.userquery)
 
     return {"response": response}
-
+app.include_router(router)
 
 # =====================================
 # NORMAL CHAT
 # =====================================
+chat_sessions: Dict[str, object] = {}
 
 class UserChat(BaseModel):
     message: str
     session_id: str
 
-
 @app.post("/main/chat")
-async def return_chatresponse(user: UserChat):
+def return_chatresponse(user: UserChat):
+
     if user.session_id not in chat_sessions:
         chat_sessions[user.session_id] = get_chat_chain()
 
     chain = chat_sessions[user.session_id]
 
-    response = chain.invoke({"input": user.message})
+    try:
+        response = chain.invoke({"input": user.message})
 
-    return JSONResponse(content={"response": response["text"]})
+        # 🔹 Extract actual text safely
+        if hasattr(response, "content"):  
+            final_output = response.content
+        elif isinstance(response, dict):
+            final_output = response.get("text", "")
+        else:
+            final_output = str(response)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {"response": final_output}
