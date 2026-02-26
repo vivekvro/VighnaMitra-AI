@@ -10,7 +10,7 @@ timeout /t 5
 
 echo.
 echo Starting Streamlit frontend...
-start cmd /k "python -m streamlit run frontend\app.py"
+start cmd /k "python -m streamlit run app.py"
 
 echo.
 echo Project is running...
